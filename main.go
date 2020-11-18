@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
+	"flag"
 	"fmt"
 	"hash/crc32"
 	"io"
@@ -19,23 +20,33 @@ import (
 )
 
 var (
-	GlobalLogger     *logrus.Logger
-	AllowedExtension string = ".mkv .mp4 .webm .avi"
+	// GlobalLogger is global logger instance
+	GlobalLogger *logrus.Logger
+	// AllowedExtension contains allowed extensions for video scan in getVideoPaths function
+	AllowedExtension string
+	// ThumbnailDir is directory for making and reading thumbnail
+	ThumbnailDir string
 )
 
 type (
+	// Video contains each video's detail
 	Video struct {
 		Path string
 		Hash string
 		Name string
 	}
 
+	// NameFunction make video id (like hash) from path
 	NameFunction func(string) (string, error)
 )
 
 func main() {
 	e := echo.New()
 	GlobalLogger = elogrus.Attach(e).Logger
+
+	flag.StringVar(&AllowedExtension, "ext", ".mkv .mp4 .webm .avi", "allowed video file extension")
+	flag.StringVar(&ThumbnailDir, "tdir", "", "directory for making and reading thumbnail. When empty, make 'thumb' directory on binary's directory and use it (it must be absolute path!)")
+	flag.Parse()
 
 	if err := checkFFmpeg(); err != nil {
 		GlobalLogger.WithError(err).Fatal("FFmpeg check error")
@@ -57,13 +68,8 @@ func startThumbnailTask(videos []Video) {
 	}
 	defer os.RemoveAll(workingDir)
 
-	wdpath, err := os.Getwd()
+	thumbDir, err := getThumbnailDirectory()
 	if err != nil {
-		GlobalLogger.Fatal(err)
-	}
-
-	thumbDir := filepath.Join(wdpath, "thumb")
-	if err := os.MkdirAll(thumbDir, os.ModePerm); err != nil {
 		GlobalLogger.Fatal(err)
 	}
 	GlobalLogger.WithFields(logrus.Fields{"thumbnail_dir": thumbDir, "temp_dir": workingDir}).Info("thumnail task start")
@@ -77,6 +83,22 @@ func startThumbnailTask(videos []Video) {
 				"output": string(out),
 			}).Error("thumnail generating error")
 		}
+	}
+}
+
+func getThumbnailDirectory() (string, error) {
+	if ThumbnailDir == "" {
+		wdpath, err := os.Getwd()
+		if err != nil {
+			return "", err
+		}
+		thumbDir := filepath.Join(wdpath, "thumb")
+		if err := os.MkdirAll(thumbDir, os.ModePerm); err != nil {
+			return "", err
+		}
+		return thumbDir, nil
+	} else {
+		return ThumbnailDir, nil
 	}
 }
 
