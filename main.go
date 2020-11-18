@@ -9,6 +9,7 @@ import (
 	"hash/crc32"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -26,14 +27,16 @@ var (
 	AllowedExtension string
 	// ThumbnailDir is directory for making and reading thumbnail
 	ThumbnailDir string
+	// VideoRootDir is root directory of videos
+	VideoRootDir string
 )
 
 type (
 	// Video contains each video's detail
 	Video struct {
-		Path string
-		Hash string
-		Name string
+		Path string `json:"path"`
+		Hash string `json:"hash"`
+		Name string `json:"name"`
 	}
 
 	// NameFunction make video id (like hash) from path
@@ -44,38 +47,60 @@ func main() {
 	e := echo.New()
 	GlobalLogger = elogrus.Attach(e).Logger
 
+	// Parse flag options
 	flag.StringVar(&AllowedExtension, "ext", ".mkv .mp4 .webm .avi", "allowed video file extension")
 	flag.StringVar(&ThumbnailDir, "tdir", "", "directory for making and reading thumbnail. When empty, make 'thumb' directory on binary's directory and use it (it must be absolute path!)")
+	flag.StringVar(&VideoRootDir, "vdir", "", "(required) root directory of videos")
 	flag.Parse()
 
+	if VideoRootDir == "" {
+		GlobalLogger.Fatal("video root directory isn't given!")
+	}
+
+	// Checking ffmpeg is existing
 	if err := checkFFmpeg(); err != nil {
-		GlobalLogger.WithError(err).Fatal("FFmpeg check error")
+		GlobalLogger.WithError(err).Fatal("ffmpeg check error")
 	}
 
-	videos, err := getVideos("e:/영화/", getFileBase64)
+	// Scan video file
+	videos, err := getVideos(VideoRootDir, getFileBase64)
 	if err != nil {
-		GlobalLogger.WithError(err).Fatal("Video scan error")
+		GlobalLogger.WithError(err).Fatal("video scan error")
 	}
-	startThumbnailTask(videos)
 
+	// Start thumbnail making task
+	thumbDir, err := getThumbnailDirectory()
+	if err != nil {
+		GlobalLogger.WithError(err).Fatal("thumbnail directory retrieve error")
+	}
+	go startThumbnailTask(videos, thumbDir)
+
+	e.Static("/thumb", thumbDir)
+	e.File("/", "static/index.html")
+	e.File("/script", "static/script.js")
+	e.File("/style", "static/style.css")
+	e.GET("/video", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, videos)
+	})
 	e.Logger.Fatal(e.Start(":80"))
 }
 
-func startThumbnailTask(videos []Video) {
+func startThumbnailTask(videos []Video, thumbDir string) {
 	workingDir, err := ioutil.TempDir("", "thumbnailer")
 	if err != nil {
 		GlobalLogger.Fatal(err)
 	}
 	defer os.RemoveAll(workingDir)
 
-	thumbDir, err := getThumbnailDirectory()
-	if err != nil {
-		GlobalLogger.Fatal(err)
-	}
-	GlobalLogger.WithFields(logrus.Fields{"thumbnail_dir": thumbDir, "temp_dir": workingDir}).Info("thumnail task start")
+	GlobalLogger.WithFields(logrus.Fields{"thumbnail_dir": thumbDir, "temp_dir": workingDir}).Info("thumbnail task start")
 
 	for _, video := range videos {
-		GlobalLogger.WithFields(logrus.Fields{"path": video.Path, "hash": video.Hash}).Info("thumnail generating start")
+		if _, err := os.Stat(filepath.Join(thumbDir, video.Hash+".gif")); err == nil {
+			GlobalLogger.WithFields(logrus.Fields{"path": video.Path, "hash": video.Hash}).Info("thumbnail already existing")
+			continue
+		}
+
+		GlobalLogger.WithFields(logrus.Fields{"path": video.Path, "hash": video.Hash}).Info("thumbnail generating start")
 		out, err := makeThumbnail(workingDir, thumbDir, video)
 		if err != nil {
 			GlobalLogger.WithFields(logrus.Fields{
@@ -113,7 +138,7 @@ func makeThumbnail(workingPath string, resultPath string, video Video) ([]byte, 
 		return out, errExtract
 	}
 
-	outConvert, errConvert := exec.Command("ffmpeg", "-y", "-f", "image2", "-i", filepath.Join(workingPath, thumbSetName), "-framerate", "1", "-vf", "scale=480:-1:flags=lanczos,setpts=6*PTS", filepath.Join(resultPath, thumbOutputName)).CombinedOutput()
+	outConvert, errConvert := exec.Command("ffmpeg", "-y", "-f", "image2", "-i", filepath.Join(workingPath, thumbSetName), "-framerate", "1", "-vf", "scale=480:-1:flags=lanczos,setpts=8*PTS", filepath.Join(resultPath, thumbOutputName)).CombinedOutput()
 	out = append(out, outConvert...)
 	if errConvert != nil {
 		return out, errConvert
