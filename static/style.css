@@ -7,13 +7,17 @@
     border: solid darkblue 1px;
     border-radius: 5px;
     width: 300px;
+    height: 160px;
     margin: 5px;
     position: relative;
-    min-height: 60px;
+    overflow: hidden;
+    text-align: center;
 }
 
 .card>img {
-    width: 300px;
+    width: auto;
+    height: 100%;
+    margin: auto;
 }
 
 .card>p {
@@ -28,4 +32,10 @@
     bottom: 5px;
     box-sizing: border-box;
     margin: 0;
+}
+
+.path-filter {
+    font-size: 1.5rem;
+    display: block;
+    width: calc(100% - 10px);
 }

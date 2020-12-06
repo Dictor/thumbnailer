@@ -5,6 +5,7 @@ var ThumbnailerApp = {
             el: '#app',
             data: {
                 videos: [],
+                pathFilter: "",
             },
             methods: {
                 getVideos: async function() {
