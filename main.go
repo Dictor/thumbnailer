@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	elogrus "github.com/dictor/echologrus"
@@ -29,6 +30,8 @@ var (
 	ThumbnailDir string
 	// VideoRootDir is root directory of videos
 	VideoRootDir string
+	// ThumbnailMinimumInterval is minimum frame interval second of animated thumbnail
+	ThumbnailMinimumInterval int
 )
 
 type (
@@ -51,6 +54,7 @@ func main() {
 	flag.StringVar(&AllowedExtension, "ext", ".mkv .mp4 .webm .avi", "allowed video file extension")
 	flag.StringVar(&ThumbnailDir, "tdir", "", "directory for making and reading thumbnail. When empty, make 'thumb' directory on binary's directory and use it (it must be absolute path!)")
 	flag.StringVar(&VideoRootDir, "vdir", "", "(required) root directory of videos")
+	flag.IntVar(&ThumbnailMinimumInterval, "tint", 200, "minimum frame interval second of animated thumbnail")
 	flag.Parse()
 
 	if VideoRootDir == "" {
@@ -132,7 +136,7 @@ func makeThumbnail(workingPath string, resultPath string, video Video) ([]byte, 
 	thumbOutputName := video.Hash + ".gif"
 	out := []byte{}
 
-	outExtract, errExtract := exec.Command("ffmpeg", "-y", "-ss", "3", "-i", video.Path, "-vf", "'select=gt(scene\\,0.1)'", "-frames:v", "10", "-vsync", "vfr", "-vf", "fps=fps=1/200", filepath.Join(workingPath, thumbSetName)).CombinedOutput()
+	outExtract, errExtract := exec.Command("ffmpeg", "-y", "-ss", "3", "-i", video.Path, "-vf", "'select=gt(scene\\,0.1)'", "-frames:v", "10", "-vsync", "vfr", "-vf", "fps=fps=1/"+strconv.Itoa(ThumbnailMinimumInterval), filepath.Join(workingPath, thumbSetName)).CombinedOutput()
 	out = append(out, outExtract...)
 	if errExtract != nil {
 		return out, errExtract
