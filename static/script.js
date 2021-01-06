@@ -1,7 +1,6 @@
 var ThumbnailerApp = {
     app: {},
     init: function() {
-        Vue.component(VLazyImage.VLazyImagePlugin);
         ThumbnailerApp.app = new Vue({
             el: '#app',
             data: {
@@ -44,6 +43,9 @@ var ThumbnailerApp = {
                     res.sort(this.parseCondition(this.sort));
                     return res;
                 },
+            },
+            components: {
+                'v-lazy-image': VLazyImage.default,
             },
         });
     }
