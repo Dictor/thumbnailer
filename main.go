@@ -33,6 +33,8 @@ var (
 	VideoRootDir string
 	// ThumbnailMinimumInterval is minimum frame interval second of animated thumbnail
 	ThumbnailMinimumInterval int
+	// SkipFFmpegCheck decides validating ffmpeg existence.
+	SkipFFmpegCheck bool
 )
 
 type (
@@ -58,6 +60,7 @@ func main() {
 	flag.StringVar(&ThumbnailDir, "tdir", "", "directory for making and reading thumbnail. When empty, make 'thumb' directory on binary's directory and use it (it must be absolute path!)")
 	flag.StringVar(&VideoRootDir, "vdir", "", "(required) root directory of videos")
 	flag.IntVar(&ThumbnailMinimumInterval, "tint", 200, "minimum frame interval second of animated thumbnail")
+	flag.BoolVar(&SkipFFmpegCheck, "fskip", false, "skip validating ffmpeg existence")
 	flag.Parse()
 
 	if VideoRootDir == "" {
@@ -65,8 +68,10 @@ func main() {
 	}
 
 	// Checking ffmpeg is existing
-	if err := checkFFmpeg(); err != nil {
-		GlobalLogger.WithError(err).Fatal("ffmpeg check error")
+	if SkipFFmpegCheck {
+		if err := checkFFmpeg(); err != nil {
+			GlobalLogger.WithError(err).Fatal("ffmpeg check error")
+		}
 	}
 
 	// Scan video file
