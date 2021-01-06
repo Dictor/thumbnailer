@@ -19,9 +19,10 @@ var ThumbnailerApp = {
                     return "./thumb/" + hash + ".gif";
                 },
                 moveVideo: function(v) {
-                    let s = v.path;
+		    let s = v.path;
                     s = s.replace(/\\/gi, "/");
-                    window.open("/prfile/" + s.substring(s.indexOf("/") + 1));
+                    s = s.replace("/video/", "");
+                    window.open("/prfile/" + s);
                 },
                 parseCondition: function(c) {
                     const condToProp = {
