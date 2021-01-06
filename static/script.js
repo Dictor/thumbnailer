@@ -25,13 +25,20 @@ var ThumbnailerApp = {
                     window.open("/prfile/" + s);
                 },
                 parseCondition: function(c) {
-                    const condToProp = {
-                        "name": "name",
-                        "date": "modified_at",
-                        "size": "size",
-                    }
                     return function(a, b) {
-                        return ((a[condToProp[c]] > b[condToProp[c]]) ? 1 : -1) * ((c[4] === "u") ? 1 : -1);
+			let res = 0;
+			switch(c.substring(0, 4)) {
+			    case "size":
+				res = a.size - b.size;
+				break;
+			    case "date":
+				res = (new Date(a.modified_at)).getTime() - (new Date(b.modified_at)).getTime();
+			    	break;
+			    case "name":
+				res = ((a.name > b.name) ? 1 : -1);
+				break;
+			}
+                        return (res * ((c[4] === "u") ? 1 : -1));
                     }
                 },
             },
