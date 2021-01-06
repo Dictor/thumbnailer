@@ -1,6 +1,9 @@
+import { VLazyImagePlugin } from "./v-lazy-image";
+
 var ThumbnailerApp = {
     app: {},
     init: function() {
+        Vue.component(VLazyImagePlugin);
         ThumbnailerApp.app = new Vue({
             el: '#app',
             data: {
@@ -25,7 +28,7 @@ var ThumbnailerApp = {
             },
             mounted: function() {
                 this.getVideos();
-            }
+            },
         });
     }
 }

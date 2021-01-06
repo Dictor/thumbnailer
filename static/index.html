@@ -21,7 +21,7 @@
     <div id="app">
         <input class="path-filter" v-model="pathFilter" placeholder="경로로 검색">
         <div class="card" v-for="(v, i) in videos" :key="i" @click="moveVideo(v)" v-if="pathFilter ? v.path.includes(pathFilter) : true">
-            <img :src="getThumbPath(v.hash)">
+            <v-lazy-image :src="getThumbPath(v.hash)" />
             <p>{{v.name}}</p>
         </div>
     </div>
