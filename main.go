@@ -68,7 +68,7 @@ func main() {
 	}
 
 	// Checking ffmpeg is existing
-	if SkipFFmpegCheck {
+	if !SkipFFmpegCheck {
 		if err := checkFFmpeg(); err != nil {
 			GlobalLogger.WithError(err).Fatal("ffmpeg check error")
 		}

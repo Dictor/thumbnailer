@@ -36,6 +36,13 @@
 
 .path-filter {
     font-size: 1.5rem;
-    display: block;
-    width: calc(100% - 10px);
+    display: inline-block;
+    width: calc(100% - 110px);
+}
+
+.sort {
+    font-size: 1.5rem;
+    color: white;
+    background-color: black;
+    width: 100px;
 }

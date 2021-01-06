@@ -1,9 +1,7 @@
-import { VLazyImagePlugin } from "./v-lazy-image";
-
 var ThumbnailerApp = {
     app: {},
     init: function() {
-        Vue.component(VLazyImagePlugin);
+        Vue.component(VLazyImage.VLazyImagePlugin);
         ThumbnailerApp.app = new Vue({
             el: '#app',
             data: {
@@ -33,7 +31,7 @@ var ThumbnailerApp = {
                         "size": "size",
                     }
                     return function(a, b) {
-                        return ((a[condToProp(c)] > b[condToProp(c)]) ? 1 : -1) * ((c[4] === "u") ? 1 : -1);
+                        return ((a[condToProp[c]] > b[condToProp[c]]) ? 1 : -1) * ((c[4] === "u") ? 1 : -1);
                     }
                 },
             },
@@ -42,8 +40,8 @@ var ThumbnailerApp = {
             },
             computed: {
                 filteredVideo: function() {
-                    let res = this.videos.filter(v => v.path.toLowerCase().includes(pathFilter.toLowerCase()));
-                    res.sort(parseCondition(this.sort));
+                    let res = this.videos.filter(v => v.path.toLowerCase().includes(this.pathFilter.toLowerCase()));
+                    res.sort(this.parseCondition(this.sort));
                     return res;
                 },
             },

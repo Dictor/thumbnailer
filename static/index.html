@@ -15,12 +15,12 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="./script"></script>
+    <script src="./v-lazy-image"></script>
 </head>
 
 <body onload="ThumbnailerApp.init()">
     <div id="app">
-        <input class="path-filter" v-model="pathFilter" placeholder="경로로 검색">
-        <select v-model="sort">
+        <select class="sort" v-model="sort">
             <option value="nameu">이름 ▲</option>
             <option value="named">이름 ▼</option>
             <option value="sizeu">크기 ▲</option>
@@ -28,6 +28,7 @@
             <option value="dateu">날짜 ▲</option>
             <option value="dated">날짜 ▼</option>
         </select>
+        <input class="path-filter" v-model="pathFilter" placeholder="경로로 검색">
         <div class="card" v-for="(v, i) in filteredVideo" :key="i" @click="moveVideo(v)" v-if="pathFilter ? v.path.includes(pathFilter) : true">
             <v-lazy-image :src="getThumbPath(v.hash)" />
             <p>{{v.name}}</p>
