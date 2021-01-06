@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	elogrus "github.com/dictor/echologrus"
 	"github.com/labstack/echo/v4"
@@ -37,9 +38,11 @@ var (
 type (
 	// Video contains each video's detail
 	Video struct {
-		Path string `json:"path"`
-		Hash string `json:"hash"`
-		Name string `json:"name"`
+		Path       string    `json:"path"`
+		Hash       string    `json:"hash"`
+		Name       string    `json:"name"`
+		Size       int64     `json:"size"`
+		ModifiedAt time.Time `json:"modified_at"`
 	}
 
 	// NameFunction make video id (like hash) from path
@@ -162,7 +165,19 @@ func getVideos(rootPath string, nameFunc NameFunction) ([]Video, error) {
 		if err != nil {
 			return nil, err
 		}
-		videos = append(videos, Video{Path: path, Hash: hash, Name: filepath.Base(path)})
+
+		finfo, err := os.Stat(path)
+		if err != nil {
+			return nil, err
+		}
+
+		videos = append(videos, Video{
+			Path:       path,
+			Hash:       hash,
+			Name:       filepath.Base(path),
+			Size:       finfo.Size(),
+			ModifiedAt: finfo.ModTime(),
+		})
 	}
 	return videos, nil
 }
