@@ -9,6 +9,7 @@ var ThumbnailerApp = {
             data: {
                 videos: [],
                 pathFilter: "",
+                sort: "nameu",
             },
             methods: {
                 getVideos: async function() {
@@ -25,9 +26,26 @@ var ThumbnailerApp = {
                     s = s.replace(/\\/gi, "/");
                     window.open("/prfile/" + s.substring(s.indexOf("/") + 1));
                 },
+                parseCondition: function(c) {
+                    const condToProp = {
+                        "name": "name",
+                        "date": "modified_at",
+                        "size": "size",
+                    }
+                    return function(a, b) {
+                        return ((a[condToProp(c)] > b[condToProp(c)]) ? 1 : -1) * ((c[4] === "u") ? 1 : -1);
+                    }
+                },
             },
             mounted: function() {
                 this.getVideos();
+            },
+            computed: {
+                filteredVideo: function() {
+                    let res = this.videos.filter(v => v.path.toLowerCase().includes(pathFilter.toLowerCase()));
+                    res.sort(parseCondition(this.sort));
+                    return res;
+                },
             },
         });
     }
