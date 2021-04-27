@@ -48,7 +48,7 @@
         </div>
         <div class="card-wrapper" v-else>
             <div class="card" v-for="(f, i) in Object.keys(folderedVideo)" :key="i" @click="moveFolder(f)">
-                <!--<v-lazy-image :src="getThumbPath(v.hash)">X</v-lazy-image>-->
+                <v-lazy-image :src="getThumbPath(folderedVideo[f][0].hash)"></v-lazy-image>
                 <p>{{ f | folderName}}</p>
             </div>
         </div>
