@@ -30,6 +30,13 @@ var ThumbnailerApp = {
                     this.pathFilter = f;
                     this.viewType = "video";
                 },
+                shuffleArray: function(array) {
+                    const res = [].concat(array);
+                    res.sort(function(){
+                        return 0.5 - Math.random();
+                    });
+                    return res
+                },
                 parseCondition: function(c) {
                     return function(a, b) {
 			let res = 0;
@@ -63,6 +70,9 @@ var ThumbnailerApp = {
                     res.sort(this.parseCondition(this.sort));
                     return res;
                 },
+                randomedVideo: function() {
+                    return this.shuffleArray(this.videos);
+                },
                 folderedVideo: function() {
                     const res = {};
                     for (const v of this.videos) {
@@ -74,7 +84,6 @@ var ThumbnailerApp = {
                             res[folder] = [v];
                         }
                     }
-                    console.log(res)
                     return res;
                 }
             },

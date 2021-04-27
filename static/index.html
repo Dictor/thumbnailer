@@ -31,10 +31,17 @@
         <select style="width: 150px;" v-model="viewType">
             <option value="video">모든 영상</option>
             <option value="folder">폴더 별</option>
+            <option value="random">무작위 영상</option>
         </select>
         <input class="path-filter" v-model="pathFilter" placeholder="경로로 검색">
         <div class="card-wrapper"  v-if="viewType === 'video'">
             <div class="card" v-for="(v, i) in filteredVideo" :key="i" @click="moveVideo(v)">
+                <v-lazy-image :src="getThumbPath(v.hash)">X</v-lazy-image>
+                <p>{{v.name}}</p>
+            </div>
+        </div>
+        <div class="card-wrapper"  v-else-if="viewType === 'random'">
+            <div class="card" v-for="(v, i) in shuffleArray(filteredVideo)" :key="i" @click="moveVideo(v)">
                 <v-lazy-image :src="getThumbPath(v.hash)">X</v-lazy-image>
                 <p>{{v.name}}</p>
             </div>
