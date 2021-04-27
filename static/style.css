@@ -1,4 +1,4 @@
-#app {
+.card-wrapper {
     display: flex;
     flex-flow: row wrap;
 }
@@ -6,8 +6,8 @@
 .card {
     border: solid darkblue 1px;
     border-radius: 5px;
-    width: 300px;
-    height: 160px;
+    width: 250px;
+    height: 140px;
     margin: 5px;
     position: relative;
     overflow: hidden;
@@ -37,12 +37,11 @@
 .path-filter {
     font-size: 1.5rem;
     display: inline-block;
-    width: calc(100% - 110px);
+    width: calc(100% - 300px);
 }
 
-.sort {
+select {
     font-size: 1.5rem;
     color: white;
     background-color: black;
-    width: 100px;
 }

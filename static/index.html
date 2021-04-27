@@ -20,7 +20,7 @@
 
 <body onload="ThumbnailerApp.init()">
     <div id="app">
-        <select class="sort" v-model="sort">
+        <select style="width: 100px;" v-model="sort">
             <option value="nameu">이름 ▲</option>
             <option value="named">이름 ▼</option>
             <option value="sizeu">크기 ▲</option>
@@ -28,10 +28,22 @@
             <option value="dateu">날짜 ▲</option>
             <option value="dated">날짜 ▼</option>
         </select>
+        <select style="width: 150px;" v-model="viewType">
+            <option value="video">모든 영상</option>
+            <option value="folder">폴더 별</option>
+        </select>
         <input class="path-filter" v-model="pathFilter" placeholder="경로로 검색">
-        <div class="card" v-for="(v, i) in filteredVideo" :key="i" @click="moveVideo(v)" v-if="pathFilter ? v.path.includes(pathFilter) : true">
-            <v-lazy-image :src="getThumbPath(v.hash)"></v-lazy-image>
-            <p>{{v.name}}</p>
+        <div class="card-wrapper"  v-if="viewType === 'video'">
+            <div class="card" v-for="(v, i) in filteredVideo" :key="i" @click="moveVideo(v)">
+                <v-lazy-image :src="getThumbPath(v.hash)">X</v-lazy-image>
+                <p>{{v.name}}</p>
+            </div>
+        </div>
+        <div class="card-wrapper" v-else>
+            <div class="card" v-for="(f, i) in Object.keys(folderedVideo)" :key="i" @click="moveFolder(f)">
+                <!--<v-lazy-image :src="getThumbPath(v.hash)">X</v-lazy-image>-->
+                <p>{{ f | folderName}}</p>
+            </div>
         </div>
     </div>
 </body>

@@ -7,11 +7,13 @@ var ThumbnailerApp = {
                 videos: [],
                 pathFilter: "",
                 sort: "nameu",
+                viewType: "video"
             },
             methods: {
                 getVideos: async function() {
                     this.videos.splice(0);
                     for (v of(await axios.get("./video")).data) {
+                        v.path  = v.path.replace(/\\/gi, "/");
                         this.videos.push(v);
                     }
                 },
@@ -19,10 +21,14 @@ var ThumbnailerApp = {
                     return "./thumb/" + hash + ".gif";
                 },
                 moveVideo: function(v) {
-		    let s = v.path;
+		            let s = v.path;
                     s = s.replace(/\\/gi, "/");
                     s = s.replace("/video/", "");
                     window.open("/prfile/" + s);
+                },
+                moveFolder: function(f) {
+                    this.pathFilter = f;
+                    this.viewType = "video";
                 },
                 parseCondition: function(c) {
                     return function(a, b) {
@@ -45,12 +51,32 @@ var ThumbnailerApp = {
             mounted: function() {
                 this.getVideos();
             },
+            filters: {
+                folderName: function(folderPath) {
+                    const ppath = folderPath.replace(/\\/gi, "/").split("/");
+                    return ppath[ppath.length - 1];
+                }
+            },
             computed: {
                 filteredVideo: function() {
-                    let res = this.videos.filter(v => v.path.toLowerCase().includes(this.pathFilter.toLowerCase()));
+                    const res = this.videos.filter(v => v.path.toLowerCase().includes(this.pathFilter.toLowerCase()));
                     res.sort(this.parseCondition(this.sort));
                     return res;
                 },
+                folderedVideo: function() {
+                    const res = {};
+                    for (const v of this.videos) {
+                        const ppath = v.path.replace(/\\/gi, "/").split("/");
+                        const folder = ppath.slice(0, ppath.length - 1).join('/');
+                        if (folder in res) {
+                            res[folder].push(v);
+                        } else {
+                            res[folder] = [v];
+                        }
+                    }
+                    console.log(res)
+                    return res;
+                }
             },
             components: {
                 'v-lazy-image': VLazyImage.default,
