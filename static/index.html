@@ -28,7 +28,7 @@
             <option value="dateu">날짜 ▲</option>
             <option value="dated">날짜 ▼</option>
         </select>
-        <select style="width: 150px;" v-model="viewType">
+        <select @change="pathFilter = ''" style="width: 150px;" v-model="viewType">
             <option value="video">모든 영상</option>
             <option value="folder">폴더 별</option>
             <option value="random">무작위 영상</option>
